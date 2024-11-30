@@ -67,7 +67,7 @@ with main_tabs[0]:
     D_value = st.sidebar.number_input("Depósitos captados ($D$)", value=800000, step=100000)
 
     # Sustituciones en el modelo
-    scenario = {
+    control_variables = {
         r_m: r_m_value,
         r_p: r_p_value,
         tau: tau_value,
@@ -81,18 +81,21 @@ with main_tabs[0]:
     }
 
     # Resolver el sistema de ecuaciones
-    solutions = solve([eq.subs(scenario) for eq in equations], endogenous_vars, dict=True)
+    solutions = solve([eq.subs(control_variables) for eq in equations], endogenous_vars, dict=True)
 
     # Manejo de escenarios guardados
     if "saved_scenarios" not in st.session_state:
-        st.session_state.saved_scenarios = []
+        st.session_state.saved_scenarios = {}
+
+    # Nombrar escenario
+    scenario_name = st.text_input("Nombre del escenario: ")
 
     # Función para guardar escenario actual
     def save_scenario():
         if solutions:
-            scenario_data = {var: float(sol[var]) for sol in solutions for var in endogenous_vars}
-            scenario_data.update({"Parametros": scenario})
-            st.session_state.saved_scenarios.append(scenario_data)
+            scenario_data = {"Variables de resultado": solutions[0]}
+            scenario_data.update({"Variables de control": control_variables})
+            st.session_state.saved_scenarios.update({scenario_name: scenario_data})
 
     # Botón para guardar escenario
     if st.button("Guardar Escenario"):
@@ -115,7 +118,7 @@ with main_tabs[0]:
                 | **= Resultado Operativo Financiero (ROF)** | {sol[ROF]:,.2f}|
                 | **(+) Ingresos por Servicios (IS)**    | {sol[IS]:,.2f}    |
                 | **(-) Gastos Administrativos (GA)**    | {sol[GA]:,.2f}    |
-                | **(±) Otros Ingresos/Egresos (OIE)**   | {scenario[OIE]:,.2f} |
+                | **(±) Otros Ingresos/Egresos (OIE)**   | {control_variables[OIE]:,.2f} |
                 | **= Resultado Operativo (RO)**         | {sol[RO]:,.2f}    |
                 | **(-) Impuestos (IMP)**                | {sol[IMP]:,.2f}   |
                 | **= Resultado del Ejercicio (RE)**     | {sol[RE]:,.2f}    |
@@ -135,7 +138,7 @@ with main_tabs[0]:
                 | **= Resultado Operativo Financiero (ROF)** | {sol[ROF] / total_if * 100:.2f} |
                 | **(+) Ingresos por Servicios (IS)**    | {sol[IS] / total_if * 100:.2f} |
                 | **(-) Gastos Administrativos (GA)**    | {sol[GA] / total_if * 100:.2f} |
-                | **(±) Otros Ingresos/Egresos (OIE)**   | {scenario[OIE] / total_if * 100:.2f} |
+                | **(±) Otros Ingresos/Egresos (OIE)**   | {control_variables[OIE] / total_if * 100:.2f} |
                 | **= Resultado Operativo (RO)**         | {sol[RO] / total_if * 100:.2f} |
                 | **(-) Impuestos (IMP)**                | {sol[IMP] / total_if * 100:.2f} |
                 | **= Resultado del Ejercicio (RE)**     | {sol[RE] / total_if * 100:.2f} |
@@ -151,11 +154,22 @@ with main_tabs[1]:
 
     # Verificar si hay escenarios guardados
     if st.session_state.saved_scenarios:
-        # Recorrer y mostrar los escenarios
-        for idx, scenario in enumerate(st.session_state.saved_scenarios):
-            st.write(f"Escenario {idx + 1}:")
-            st.write(scenario)
-            st.write("----------")  # Línea separadora para mejor presentación
+        
+        # Mostar tabla de control
+        
+        
+        # Mostrar tabla de resultados
+        scenario_dict = st.session_state.saved_scenarios[scenario_name]["Variables de resultado"]
+        scenario_df = pd.DataFrame(scenario_dict, index=[scenario_name])
+        #TODO Renombrar nombre de las variables por algo más explicativos como el del estado de resultados
+        
+        st.dataframe(scenario_df.T)
+            
+        # Mostrar tabla de composición
+        
+        # Mostrar tabla de métricas
+        
+        # Mostrar gráfico de radar sobre métricas
     else:
         st.write("No hay escenarios guardados.")
         
