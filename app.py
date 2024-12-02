@@ -174,48 +174,59 @@ with main_tabs[1]:
         st.write("No hay escenarios guardados.")
         
 with main_tabs[2]:
-    # Mostrar tabla en Markdown
-    st.subheader("Análisis")
+    
+    # Mostrar tabla de información financiera
+    st.subheader("Análisis Financiero")
     st.markdown(r"""
-    | **Partida**                                    | **Fórmula**                                 |
-    |------------------------------------------------|---------------------------------------------|
-    | **Ingresos Financieros ($IF$)**                | $IF = r_m \times L$                         |
-    | **Gastos Financieros ($GF$)**                  | $GF = r_p \times D$                         |
-    | **Resultado Neto Financiero ($RNF$)**          | $RNF = IF - GF$                             |
-    | **Provisiones por Riesgos de Crédito ($PRC$)** | $PRC = \beta \times \rho \times L$          |
-    | **Resultado Operativo Financiero ($ROF$)**     | $ROF = RNF - PRC$                           |
-    | **Ingresos por Servicios ($IS$)**              | $IS = \sigma \times L$                      |
-    | **Gastos Administrativos ($GA$)**              | $GA = \gamma \times IF$                     |
-    | **Resultado Operativo ($RO$)**                 | $RO = ROF + IS - GA + OIE$                  |
-    | **Impuestos ($IMP$)**                          | $IMP = \tau \times RO$                      |
-    | **Resultado del Ejercicio ($RE$)**             | $RE = RO - IMP$                             |
+    | Rubro                           | Símbolo    | Cálculo: Fórmula o Valor |
+    |---------------------------------|------------|--------------------------|
+    | **Cartera**                     | $CAR$      | dado |
+    | **Total de Ingresos**           | $TOT\_ING$ | $TOT\_ING = ING\_FIN + ING\_CUR + ING\_SEG$ |
+    | **Ingresos Financieros**        | $ING\_FIN$ | $ING\_FIN = INT + MOR + DES$ |
+    | - Interés                       | $INT$      | $\alpha_{INT} \cdot CAR$ |
+    | - Mora                          | $MOR$      | $\alpha_{MOR} \cdot CAR$ |
+    | - Desgravamen                   | $DES$      | $\alpha_{DES} \cdot CAR$ |
+    | **Ingresos por Cursos**         | $ING\_CUR$ | $\alpha_{ING\_CUR} \cdot CAR$ |
+    | **Ingresos por Seguros**        | $ING\_SEG$ | $\alpha_{ING\_SEG} \cdot CAR$ |
+    | **Total de Gastos**             | $TOT\_GAS$ | $TOT\_GAS = DEP + COS\_FON + PRO$ |
+    | - Costo de Fondeo               | $COS_FON$  | $COS\_FON = \alpha_{COS\_FON} \cdot DEP$ |
+    | * Depósitos                     | $DEP$      | $DEP = \alpha_{DEP} \cdot CAR $ |
+    | - Provisión                     | $PRO$      | $PRO = \alpha_{PRO} \cdot CAR$ |
+    | **Utilidad Bruta**              | $UTI\_BRU$ | $UTI\_BRU = TOT\_ING - TOT\_GAS$ |
+    | **Gastos Administrativos**      | $GAS\_ADM$ | $GAS\_ADM = SAL\_PER + ALQ\_MAN + SER\_BAS + CLC$ |
+    | - Salario del Personal          | $SAL\_PER$ | $SAL\_PER = \alpha_{SAL\_PER} \cdot ING\_FIN$ |
+    | - Alquiler y Mantenimiento      | $ALQ\_MAN$ | $ALQ\_MAN = \alpha_{ALQ\_MAN} \cdot ING\_FIN$ |
+    | - Servicios Básicos             | $SER\_BAS$ | $SER\_BAS = \alpha_{SER\_BAS} \cdot ING\_FIN$ |
+    | - Costos Legales de Consultoría | $CLC$      | $CLC = \alpha_{CLC} \cdot ING\_FIN$ |
+    | **Gastos Operativos**           | $GAS\_OPE$ | $GO = PUB\_MAR + COM\_VEN + EFC + GAS\_OFI$ |
+    | - Publicidad y Marketing        | $PUB\_MAR$ | $PUB\_MAR = \alpha_{PUB\_MAR} \cdot ING\_FIN$ |
+    | - Comisiones de Ventas          | $COM\_VEN$ | $COM\_VEN = \alpha_{COM\_VEN} \cdot ING\_FIN$ |
+    | - Eventos y Ferias Comerciales  | $EFC$      | $EFC = \alpha_{EFC} \cdot ING\_FIN$ |
+    | - Gastos de Oficina             | $GAS\_OFI$ | $GAS\_OFI = \alpha_{GAS\_OFI} \cdot ING\_FIN$ |
+    | **Utilidad Neta**               | $UTI\_NET$ | $UTI\_NET = UTI\_BRU - GAS\_ADM - GAS\_OPE$ |
     """)
-
-    # Variables
-    st.subheader("Variables")
+    
+    # Tabla de parámetros
+    st.subheader("Parámetros")
     st.markdown(r"""
-    | **Variable**                                 | **Símbolo**                            | **Tipo de Variable**                      |
-    |----------------------------------------------|----------------------------------------|-------------------------------------------|
-    | **Ingresos Financieros**                     | $IF$                                   | Variable de Resultado                     |
-    | **Gastos Financieros**                       | $GF$                                   | Variable de Resultado                     |
-    | **Resultado Neto Financiero**                | $RNF$                                  | Variable de Resultado                     |
-    | **Provisiones por Riesgos de Crédito**       | $PRC$                                  | Variable de Resultado                     |
-    | **Resultado Operativo Financiero**          | $ROF$                                  | Variable de Resultado                     |
-    | **Ingresos por Servicios**                   | $IS$                                   | Variable de Resultado                     |
-    | **Gastos Administrativos**                   | $GA$                                   | Variable de Resultado                     |
-    | **Resultado Operativo**                      | $RO$                                   | Variable de Resultado                     |
-    | **Impuestos**                               | $IMP$                                  | Variable de Resultado                     |
-    | **Resultado del Ejercicio**                  | $RE$                                   | Variable de Resultado                     |
-    | **Tasa de Interés Activa ($r_m$)**            | $r_m$                                  | Variable de Control                       |
-    | **Tasa de Interés Pasiva ($r_p$)**           | $r_p$                                  | Variable de Control                       |
-    | **Depósitos ($D$)**                          | $D$                                    | Variable de Control                       |
-    | **Monto de Créditos ($L$)**                  | $L$                                    | Variable de Control                       |
-    | **Factor de Riesgo ($\beta$)**               | $\beta$                                | Variable de Control                       |
-    | **Factor de Liquidez ($\rho$)**              | $\rho$                                 | Variable de Control                       |
-    | **Factor de Rentabilidad ($\sigma$)**        | $\sigma$                               | Variable de Control                       |
-    | **Factor de Costo Administrativo ($\gamma$)**| $\gamma$                               | Variable de Control                       |
-    | **Tasa de Impuesto ($\tau$)**                | $\tau$                                 | Variable de Control                       |
-    | **Otros Ingresos y Egresos ($OIE$)**         | $OIE$                                  | Variable de Control                       |
+    | Proporción       | Descripción                              | Rubro                     |
+    |------------------|------------------------------------------|---------------------------|
+    | $\alpha_{INT}$   | Tasa de interés aplicada                 | Interés (Ingresos Financieros) |
+    | $\alpha_{MOR}$   | Tasa de mora aplicada                    | Mora (Ingresos Financieros) |
+    | $\alpha_{DES}$   | Tasa de desgravamen aplicada             | Desgravamen (Ingresos Financieros) |
+    | $\alpha_{ING\_CUR}$ | Tasa aplicada a los ingresos por cursos | Ingresos por Cursos       |
+    | $\alpha_{ING\_SEG}$ | Tasa aplicada a los ingresos por seguros | Ingresos por Seguros      |
+    | $\alpha_{COS\_FON}$ | Proporción del costo de fondeo sobre depósitos | Costo de Fondeo (Gastos) |
+    | $\alpha_{DEP}$   | Tasa aplicada a los depósitos            | Depósitos (Gastos)        |
+    | $\alpha_{PRO}$   | Proporción de provisión aplicada         | Provisión (Gastos)        |
+    | $\alpha_{SAL\_PER}$ | Proporción de salario del personal     | Salario del Personal (Gastos Administrativos) |
+    | $\alpha_{ALQ\_MAN}$ | Proporción de alquiler y mantenimiento | Alquiler y Mantenimiento (Gastos Administrativos) |
+    | $\alpha_{SER\_BAS}$ | Proporción de servicios básicos        | Servicios Básicos (Gastos Administrativos) |
+    | $\alpha_{CLC}$   | Proporción de costos legales de consultoría | Costos Legales de Consultoría (Gastos Administrativos) |
+    | $\alpha_{PUB\_MAR}$ | Proporción de publicidad y marketing   | Publicidad y Marketing (Gastos Operativos) |
+    | $\alpha_{COM\_VEN}$ | Proporción de comisiones de ventas     | Comisiones de Ventas (Gastos Operativos) |
+    | $\alpha_{EFC}$   | Proporción de eventos y ferias comerciales | Eventos y Ferias Comerciales (Gastos Operativos) |
+    | $\alpha_{GAS\_OFI}$ | Proporción de gastos de oficina        | Gastos de Oficina (Gastos Operativos) |
     """)
 
     # Grafo de dependencias
@@ -224,9 +235,9 @@ with main_tabs[2]:
     Este gráfico muestra las relaciones de dependencia entre las variables del modelo. Sus elementos son:
     
     1. **Nodos**:
-        - Representan variables de control o de resultado.
+        - Representan variables de proporciones o calculadas.
         - Se diferencian por colores:
-            - **Rojo**: Variables de control.
+            - **Rojo**: Variables de proporciones.
             - **Azul**: Variables de resultado.
     2. **Aristas**:
         - Representan las relaciones de dependencia entre variables.
