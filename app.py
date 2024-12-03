@@ -11,33 +11,54 @@ st.title("DILE - Simulación")
 main_tabs = st.tabs(["Simulación", "Comparación",  "Información"])
 
 with main_tabs[0]:
-    # Definir variables exógenas
-    r_m, r_p, tau, rho = symbols('r_m r_p tau rho')  # Tasa de interés activa, pasiva, impuestos, morosidad
-
     # Definir parámetros
-    beta, gamma, sigma, OIE = symbols('beta gamma sigma OIE')  # Provisiones, gastos admin, comisiones servicios, otros ingresos
+    alpha_INT, alpha_MOR, alpha_DES, alpha_ING_CUR = symbols('alpha_INT alpha_MOR alpha_DES alpha_ING_CUR')
+    alpha_ING_SEG, alpha_COS_FON, alpha_DEP, alpha_PRO = symbols('alpha_ING_SEG alpha_COS_FON alpha_DEP alpha_PRO')
+    alpha_SAL_PER, alpha_ALQ_MAN, alpha_SER_BAS, alpha_CLC = symbols('alpha_SAL_PER alpha_ALQ_MAN alpha_SER_BAS alpha_CLC')
+    alpha_PUB_MAR, alpha_COM_VEN, alpha_EFC, alpha_GAS_OFI = symbols('alpha_PUB_MAR alpha_COM_VEN alpha_EFC alpha_GAS_OFI')
+
+    # Definir variables exógenas
+    CAR = symbols('CAR')
 
     # Definir variables endógenas
-    L, D = symbols('L D')  # Préstamos y depósitos
-    IF, GF = symbols('IF GF')  # Ingresos y gastos financieros
-    RNF, PRC = symbols('RNF PRC')  # Resultado neto financiero y provisiones
-    ROF, IS, GA, RO, IMP, RE = symbols('ROF IS GA RO IMP RE')  # Variables del resultado operativo y neto
+    TOT_ING = symbols('TOT_ING')
+    ING_FIN = symbols('ING_FIN')
+    INT, MOR, DES = symbols('INT MOR DES')
+    ING_CUR, ING_SEG = symbols('ING_CUR ING_SEG')
+    TOT_GAS, COS_FON, DEP, PRO = symbols('TOT_GAS COS_FON DEP PRO')
+    UTI_BRU = symbols('UTI_BRU')
+    GAS_ADM, SAL_PER, ALQ_MAN, SER_BAS, CLC = symbols('GAS_ADM SAL_PER ALQ_MAN SER_BAS CLC')
+    GAS_OPE, PUB_MAR, COM_VEN, EFC, GAS_OFI = symbols('GAS_OPE PUB_MAR COM_VEN EFC GAS_OFI')
+    UTI_NET = symbols('UTI_NET')
 
     # Definir las ecuaciones del modelo
-    eq1 = Eq(IF, r_m * L)  # Ingresos financieros
-    eq2 = Eq(GF, r_p * D)  # Gastos financieros
-    eq3 = Eq(RNF, IF - GF)  # Resultado neto financiero
-    eq4 = Eq(PRC, beta * rho * L)  # Provisiones por riesgo de crédito
-    eq5 = Eq(ROF, RNF - PRC)  # Resultado operativo financiero
-    eq6 = Eq(IS, sigma * L)  # Ingresos por servicios
-    eq7 = Eq(GA, gamma * IF)  # Gastos administrativos
-    eq8 = Eq(RO, ROF + IS - GA + OIE)  # Resultado operativo
-    eq9 = Eq(IMP, tau * RO)  # Impuestos
-    eq10 = Eq(RE, RO - IMP)  # Resultado del ejercicio
+    eq1 = Eq(TOT_ING, ING_FIN + ING_CUR + ING_SEG)
+    eq2 = Eq(ING_FIN, INT + MOR + DES)
+    eq3 = Eq(INT, alpha_INT * CAR)
+    eq4 = Eq(MOR, alpha_MOR * CAR)
+    eq5 = Eq(DES, alpha_DES * CAR)
+    eq6 = Eq(ING_CUR, alpha_ING_CUR * CAR)
+    eq7 = Eq(ING_SEG, alpha_ING_SEG * CAR)
+    eq8 = Eq(TOT_GAS, DEP + COS_FON + PRO)
+    eq9 = Eq(COS_FON, alpha_COS_FON * DEP)
+    eq10 = Eq(DEP, alpha_DEP * CAR)
+    eq11 = Eq(PRO, alpha_PRO * CAR)
+    eq12 = Eq(UTI_BRU, TOT_ING - TOT_GAS)
+    eq13 = Eq(GAS_ADM, SAL_PER + ALQ_MAN + SER_BAS + CLC)
+    eq14 = Eq(SAL_PER, alpha_SAL_PER * ING_FIN)
+    eq15 = Eq(ALQ_MAN, alpha_ALQ_MAN * ING_FIN)
+    eq16 = Eq(SER_BAS, alpha_SER_BAS * ING_FIN)
+    eq17 = Eq(CLC, alpha_CLC * ING_FIN)
+    eq18 = Eq(GAS_OPE, PUB_MAR + COM_VEN + EFC + GAS_OFI)
+    eq19 = Eq(PUB_MAR, alpha_PUB_MAR * ING_FIN)
+    eq20 = Eq(COM_VEN, alpha_COM_VEN * ING_FIN)
+    eq21 = Eq(EFC, alpha_EFC * ING_FIN)
+    eq22 = Eq(GAS_OFI, alpha_GAS_OFI * ING_FIN)
+    eq23 = Eq(UTI_NET, UTI_BRU - GAS_ADM - GAS_OPE)
 
     # Resolver simbólicamente las variables endógenas en función de las demás
-    endogenous_vars = [IF, GF, RNF, PRC, ROF, IS, GA, RO, IMP, RE]
-    equations = [eq1, eq2, eq3, eq4, eq5, eq6, eq7, eq8, eq9, eq10]
+    endogenous_vars = [TOT_ING, ING_FIN, INT, MOR, DES, ING_CUR, ING_SEG, TOT_GAS, COS_FON, DEP, PRO, UTI_BRU, GAS_ADM, SAL_PER, ALQ_MAN, SER_BAS, CLC, GAS_OPE, PUB_MAR, COM_VEN, EFC, GAS_OFI, UTI_NET]
+    equations = [eq1, eq2, eq3, eq4, eq5, eq6, eq7, eq8, eq9, eq10, eq11, eq12, eq13, eq14, eq15, eq16, eq17, eq18, eq19, eq20, eq21, eq22, eq23]
 
     # Crear un grafo de dependencias
     graph = nx.DiGraph()
@@ -48,36 +69,49 @@ with main_tabs[0]:
         rhs = eq.rhs
         graph.add_node(str(lhs), type="endogenous")
         for symbol in rhs.free_symbols:
-            graph.add_node(str(symbol), type="exogenous" if symbol in [r_m, r_p, tau, rho, beta, gamma, sigma, OIE, L, D] else "parameter")
+            graph.add_node(str(symbol), type="exogenous" if symbol in [CAR, alpha_INT, alpha_MOR, alpha_DES, alpha_ING_CUR, alpha_ING_SEG, alpha_COS_FON, alpha_DEP, alpha_PRO, alpha_SAL_PER, alpha_ALQ_MAN, alpha_SER_BAS, alpha_CLC, alpha_PUB_MAR, alpha_COM_VEN, alpha_EFC, alpha_GAS_OFI] else "parameter")
             graph.add_edge(str(symbol), str(lhs))
     st.sidebar.header("Parámetros del Modelo")
 
+    # Valores de entrada
+    CAR_value = st.sidebar.number_input("Cartera ($CAR$)", value=1000000, step=100000)
+
     # Parámetros ajustables
-    r_m_value = st.sidebar.slider("Tasa de interés activa ($r_m$)", 0.01, 0.20, 0.10, 0.01)
-    r_p_value = st.sidebar.slider("Tasa de interés pasiva ($r_p$)", 0.01, 0.10, 0.05, 0.01)
-    tau_value = st.sidebar.slider("Tasa de impuestos ($tau$)", 0.0, 0.50, 0.30, 0.05)
-    rho_value = st.sidebar.slider("Tasa de morosidad ($rho$)", 0.0, 0.10, 0.02, 0.01)
-    beta_value = st.sidebar.slider("Coeficiente de provisión ($beta$)", 0.1, 1.0, 0.5, 0.1)
-    gamma_value = st.sidebar.slider("Gastos administrativos (% ingresos financieros, $gamma$)", 0.0, 0.3, 0.1, 0.05)
-    sigma_value = st.sidebar.slider("Comisiones (% préstamos, $sigma$)", 0.0, 0.05, 0.01, 0.005)
-    OIE_value = st.sidebar.number_input("Otros ingresos extraordinarios ($OIE$)", value=5000, step=500)
-
-    # Valores de préstamos y depósitos
-    L_value = st.sidebar.number_input("Préstamos otorgados ($L$)", value=1000000, step=100000)
-    D_value = st.sidebar.number_input("Depósitos captados ($D$)", value=800000, step=100000)
-
+    alpha_INT_value = st.sidebar.slider("Proporción de Tasa de Interés ($\u03B1_{INT}$)", min_value=0.0, max_value=1.0, value=0.1, step=0.01)
+    alpha_MOR_value = st.sidebar.slider("Proporción de Tasa de Mora ($\u03B1_{MOR}$)", min_value=0.0, max_value=1.0, value=0.1, step=0.01)
+    alpha_DES_value = st.sidebar.slider("Proporción de Tasa de Desgravamen ($\u03B1_{DES}$)", min_value=0.0, max_value=1.0, value=0.1, step=0.01)
+    alpha_ING_CUR_value = st.sidebar.slider("Proporción de Ingresos por Cursos ($\u03B1_{ING\_CUR}$)", min_value=0.0, max_value=1.0, value=0.1, step=0.01)
+    alpha_ING_SEG_value = st.sidebar.slider("Proporción de Ingresos por Seguros ($\u03B1_{ING\_SEG}$)", min_value=0.0, max_value=1.0, value=0.1, step=0.01)
+    alpha_COS_FON_value = st.sidebar.slider("Proporción del Costo de Fondeo ($\u03B1_{COS\_FON}$)", min_value=0.0, max_value=1.0, value=0.1, step=0.01)
+    alpha_DEP_value = st.sidebar.slider("Proporción de Depósitos ($\u03B1_{DEP}$)", min_value=0.0, max_value=1.0, value=0.1, step=0.01)
+    alpha_PRO_value = st.sidebar.slider("Proporción de Provisión ($\u03B1_{PRO}$)", min_value=0.0, max_value=1.0, value=0.1, step=0.01)
+    alpha_SAL_PER_value = st.sidebar.slider("Proporción de Salario del Personal ($\u03B1_{SAL\_PER}$)", min_value=0.0, max_value=1.0, value=0.1, step=0.01)
+    alpha_ALQ_MAN_value = st.sidebar.slider("Proporción de Alquiler y Mantenimiento ($\u03B1_{ALQ\_MAN}$)", min_value=0.0, max_value=1.0, value=0.1, step=0.01)
+    alpha_SER_BAS_value = st.sidebar.slider("Proporción de Servicios Básicos ($\u03B1_{SER\_BAS}$)", min_value=0.0, max_value=1.0, value=0.1, step=0.01)
+    alpha_CLC_value = st.sidebar.slider("Proporción de Costos Legales de Consultoría ($\u03B1_{CLC}$)", min_value=0.0, max_value=1.0, value=0.1, step=0.01)
+    alpha_PUB_MAR_value = st.sidebar.slider("Proporción de Publicidad y Marketing ($\u03B1_{PUB\_MAR}$)", min_value=0.0, max_value=1.0, value=0.1, step=0.01)
+    alpha_COM_VEN_value = st.sidebar.slider("Proporción de Comisiones de Ventas ($\u03B1_{COM\_VEN}$)", min_value=0.0, max_value=1.0, value=0.1, step=0.01)
+    alpha_EFC_value = st.sidebar.slider("Proporción de Eventos y Ferias Comerciales ($\u03B1_{EFC}$)", min_value=0.0, max_value=1.0, value=0.1, step=0.01)
+    alpha_GAS_OFI_value = st.sidebar.slider("Proporción de Gastos de Oficina ($\u03B1_{GAS\_OFI}$)", min_value=0.0, max_value=1.0, value=0.1, step=0.01)
+    
     # Sustituciones en el modelo
     control_variables = {
-        r_m: r_m_value,
-        r_p: r_p_value,
-        tau: tau_value,
-        rho: rho_value,
-        beta: beta_value,
-        gamma: gamma_value,
-        sigma: sigma_value,
-        OIE: OIE_value,
-        L: L_value,
-        D: D_value
+        alpha_INT: alpha_INT_value,
+        alpha_MOR: alpha_MOR_value,
+        alpha_DES: alpha_DES_value,
+        alpha_ING_CUR: alpha_ING_CUR_value,
+        alpha_ING_SEG: alpha_ING_SEG_value,
+        alpha_COS_FON: alpha_COS_FON_value,
+        alpha_DEP: alpha_DEP_value,
+        alpha_PRO: alpha_PRO_value,
+        alpha_SAL_PER: alpha_SAL_PER_value,
+        alpha_ALQ_MAN: alpha_ALQ_MAN_value,
+        alpha_SER_BAS: alpha_SER_BAS_value,
+        alpha_CLC: alpha_CLC_value,
+        alpha_PUB_MAR: alpha_PUB_MAR_value,
+        alpha_COM_VEN: alpha_COM_VEN_value,
+        alpha_EFC: alpha_EFC_value,
+        alpha_GAS_OFI: alpha_GAS_OFI_value,
     }
 
     # Resolver el sistema de ecuaciones
@@ -102,51 +136,7 @@ with main_tabs[0]:
         save_scenario()
         st.success("Escenario guardado con éxito")
 
-    # Mostrar resultados
-    st.subheader("Resultados del Estado de Resultados")
-    # Mostrar resultados como estado de resultados
-    if solutions:
-        for sol in solutions:
-            st.markdown(
-                f"""
-                | **Cuenta**                             | **Monto (S/.)**   |
-                |----------------------------------------|-------------------|
-                | **Ingresos financieros (IF)**          | {sol[IF]:,.2f}    |
-                | **(-) Gastos financieros (GF)**        | {sol[GF]:,.2f}    |
-                | **= Resultado Neto Financiero (RNF)**  | {sol[RNF]:,.2f}   |
-                | **(-) Provisiones (PRC)**              | {sol[PRC]:,.2f}   |
-                | **= Resultado Operativo Financiero (ROF)** | {sol[ROF]:,.2f}|
-                | **(+) Ingresos por Servicios (IS)**    | {sol[IS]:,.2f}    |
-                | **(-) Gastos Administrativos (GA)**    | {sol[GA]:,.2f}    |
-                | **(±) Otros Ingresos/Egresos (OIE)**   | {control_variables[OIE]:,.2f} |
-                | **= Resultado Operativo (RO)**         | {sol[RO]:,.2f}    |
-                | **(-) Impuestos (IMP)**                | {sol[IMP]:,.2f}   |
-                | **= Resultado del Ejercicio (RE)**     | {sol[RE]:,.2f}    |
-                """
-            )
-            
-            st.subheader("Composición Porcetual")
-            total_if = sol[IF]
-            st.markdown(
-                f"""
-                | **Cuenta**                             | **Porcentaje (%)**   |
-                |----------------------------------------|-----------------------|
-                | **Ingresos financieros (IF)**          | 100.00               |
-                | **(-) Gastos financieros (GF)**        | {sol[GF] / total_if * 100:.2f} |
-                | **= Resultado Neto Financiero (RNF)**  | {sol[RNF] / total_if * 100:.2f} |
-                | **(-) Provisiones (PRC)**              | {sol[PRC] / total_if * 100:.2f} |
-                | **= Resultado Operativo Financiero (ROF)** | {sol[ROF] / total_if * 100:.2f} |
-                | **(+) Ingresos por Servicios (IS)**    | {sol[IS] / total_if * 100:.2f} |
-                | **(-) Gastos Administrativos (GA)**    | {sol[GA] / total_if * 100:.2f} |
-                | **(±) Otros Ingresos/Egresos (OIE)**   | {control_variables[OIE] / total_if * 100:.2f} |
-                | **= Resultado Operativo (RO)**         | {sol[RO] / total_if * 100:.2f} |
-                | **(-) Impuestos (IMP)**                | {sol[IMP] / total_if * 100:.2f} |
-                | **= Resultado del Ejercicio (RE)**     | {sol[RE] / total_if * 100:.2f} |
-                """
-            )
-    else:
-        st.error("No se pudo resolver el sistema de ecuaciones con los valores proporcionados.")
-    
+
 
 with main_tabs[1]:
     # Mostrar los escenarios guardados
@@ -189,7 +179,7 @@ with main_tabs[2]:
     | **Ingresos por Cursos**         | $ING\_CUR$ | $\alpha_{ING\_CUR} \cdot CAR$ |
     | **Ingresos por Seguros**        | $ING\_SEG$ | $\alpha_{ING\_SEG} \cdot CAR$ |
     | **Total de Gastos**             | $TOT\_GAS$ | $TOT\_GAS = DEP + COS\_FON + PRO$ |
-    | - Costo de Fondeo               | $COS_FON$  | $COS\_FON = \alpha_{COS\_FON} \cdot DEP$ |
+    | - Costo de Fondeo               | $COS\_FON$ | $COS\_FON = \alpha_{COS\_FON} \cdot DEP$ |
     | * Depósitos                     | $DEP$      | $DEP = \alpha_{DEP} \cdot CAR $ |
     | - Provisión                     | $PRO$      | $PRO = \alpha_{PRO} \cdot CAR$ |
     | **Utilidad Bruta**              | $UTI\_BRU$ | $UTI\_BRU = TOT\_ING - TOT\_GAS$ |
