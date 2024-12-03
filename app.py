@@ -31,34 +31,35 @@ with main_tabs[0]:
     GAS_OPE, PUB_MAR, COM_VEN, EFC, GAS_OFI = symbols('GAS_OPE PUB_MAR COM_VEN EFC GAS_OFI')
     UTI_NET = symbols('UTI_NET')
 
-    # Definir las ecuaciones del modelo
-    eq1 = Eq(TOT_ING, ING_FIN + ING_CUR + ING_SEG)
-    eq2 = Eq(ING_FIN, INT + MOR + DES)
-    eq3 = Eq(INT, alpha_INT * CAR)
-    eq4 = Eq(MOR, alpha_MOR * CAR)
-    eq5 = Eq(DES, alpha_DES * CAR)
-    eq6 = Eq(ING_CUR, alpha_ING_CUR * CAR)
-    eq7 = Eq(ING_SEG, alpha_ING_SEG * CAR)
-    eq8 = Eq(TOT_GAS, DEP + COS_FON + PRO)
-    eq9 = Eq(COS_FON, alpha_COS_FON * DEP)
-    eq10 = Eq(DEP, alpha_DEP * CAR)
-    eq11 = Eq(PRO, alpha_PRO * CAR)
-    eq12 = Eq(UTI_BRU, TOT_ING - TOT_GAS)
-    eq13 = Eq(GAS_ADM, SAL_PER + ALQ_MAN + SER_BAS + CLC)
-    eq14 = Eq(SAL_PER, alpha_SAL_PER * ING_FIN)
-    eq15 = Eq(ALQ_MAN, alpha_ALQ_MAN * ING_FIN)
-    eq16 = Eq(SER_BAS, alpha_SER_BAS * ING_FIN)
-    eq17 = Eq(CLC, alpha_CLC * ING_FIN)
-    eq18 = Eq(GAS_OPE, PUB_MAR + COM_VEN + EFC + GAS_OFI)
-    eq19 = Eq(PUB_MAR, alpha_PUB_MAR * ING_FIN)
-    eq20 = Eq(COM_VEN, alpha_COM_VEN * ING_FIN)
-    eq21 = Eq(EFC, alpha_EFC * ING_FIN)
-    eq22 = Eq(GAS_OFI, alpha_GAS_OFI * ING_FIN)
-    eq23 = Eq(UTI_NET, UTI_BRU - GAS_ADM - GAS_OPE)
+    # Definir ecuaciones
+    equations = [
+        Eq(TOT_ING, ING_FIN + ING_CUR + ING_SEG),
+        Eq(ING_FIN, INT + MOR + DES),
+        Eq(INT, alpha_INT * CAR),
+        Eq(MOR, alpha_MOR * CAR),
+        Eq(DES, alpha_DES * CAR),
+        Eq(ING_CUR, alpha_ING_CUR * CAR),
+        Eq(ING_SEG, alpha_ING_SEG * CAR),
+        Eq(TOT_GAS, DEP + COS_FON + PRO),
+        Eq(COS_FON, alpha_COS_FON * DEP),
+        Eq(DEP, alpha_DEP * CAR),
+        Eq(PRO, alpha_PRO * CAR),
+        Eq(UTI_BRU, TOT_ING - TOT_GAS),
+        Eq(GAS_ADM, SAL_PER + ALQ_MAN + SER_BAS + CLC),
+        Eq(SAL_PER, alpha_SAL_PER * ING_FIN),
+        Eq(ALQ_MAN, alpha_ALQ_MAN * ING_FIN),
+        Eq(SER_BAS, alpha_SER_BAS * ING_FIN),
+        Eq(CLC, alpha_CLC * ING_FIN),
+        Eq(GAS_OPE, PUB_MAR + COM_VEN + EFC + GAS_OFI),
+        Eq(PUB_MAR, alpha_PUB_MAR * ING_FIN),
+        Eq(COM_VEN, alpha_COM_VEN * ING_FIN),
+        Eq(EFC, alpha_EFC * ING_FIN),
+        Eq(GAS_OFI, alpha_GAS_OFI * ING_FIN),
+        Eq(UTI_NET, UTI_BRU - GAS_ADM - GAS_OPE),
+    ]
 
     # Resolver simbólicamente las variables endógenas en función de las demás
     endogenous_vars = [TOT_ING, ING_FIN, INT, MOR, DES, ING_CUR, ING_SEG, TOT_GAS, COS_FON, DEP, PRO, UTI_BRU, GAS_ADM, SAL_PER, ALQ_MAN, SER_BAS, CLC, GAS_OPE, PUB_MAR, COM_VEN, EFC, GAS_OFI, UTI_NET]
-    equations = [eq1, eq2, eq3, eq4, eq5, eq6, eq7, eq8, eq9, eq10, eq11, eq12, eq13, eq14, eq15, eq16, eq17, eq18, eq19, eq20, eq21, eq22, eq23]
 
     # Crear un grafo de dependencias
     graph = nx.DiGraph()
@@ -71,52 +72,36 @@ with main_tabs[0]:
         for symbol in rhs.free_symbols:
             graph.add_node(str(symbol), type="exogenous" if symbol in [CAR, alpha_INT, alpha_MOR, alpha_DES, alpha_ING_CUR, alpha_ING_SEG, alpha_COS_FON, alpha_DEP, alpha_PRO, alpha_SAL_PER, alpha_ALQ_MAN, alpha_SER_BAS, alpha_CLC, alpha_PUB_MAR, alpha_COM_VEN, alpha_EFC, alpha_GAS_OFI] else "parameter")
             graph.add_edge(str(symbol), str(lhs))
+
     st.sidebar.header("Parámetros del Modelo")
 
-    # Valores de entrada
+    # Entrada de usurio
     CAR_value = st.sidebar.number_input("Cartera ($CAR$)", value=1000000, step=100000)
-
-    # Parámetros ajustables
-    alpha_INT_value = st.sidebar.slider("Proporción de Tasa de Interés ($\u03B1_{INT}$)", min_value=0.0, max_value=1.0, value=0.1, step=0.01)
-    alpha_MOR_value = st.sidebar.slider("Proporción de Tasa de Mora ($\u03B1_{MOR}$)", min_value=0.0, max_value=1.0, value=0.1, step=0.01)
-    alpha_DES_value = st.sidebar.slider("Proporción de Tasa de Desgravamen ($\u03B1_{DES}$)", min_value=0.0, max_value=1.0, value=0.1, step=0.01)
-    alpha_ING_CUR_value = st.sidebar.slider("Proporción de Ingresos por Cursos ($\u03B1_{ING\_CUR}$)", min_value=0.0, max_value=1.0, value=0.1, step=0.01)
-    alpha_ING_SEG_value = st.sidebar.slider("Proporción de Ingresos por Seguros ($\u03B1_{ING\_SEG}$)", min_value=0.0, max_value=1.0, value=0.1, step=0.01)
-    alpha_COS_FON_value = st.sidebar.slider("Proporción del Costo de Fondeo ($\u03B1_{COS\_FON}$)", min_value=0.0, max_value=1.0, value=0.1, step=0.01)
-    alpha_DEP_value = st.sidebar.slider("Proporción de Depósitos ($\u03B1_{DEP}$)", min_value=0.0, max_value=1.0, value=0.1, step=0.01)
-    alpha_PRO_value = st.sidebar.slider("Proporción de Provisión ($\u03B1_{PRO}$)", min_value=0.0, max_value=1.0, value=0.1, step=0.01)
-    alpha_SAL_PER_value = st.sidebar.slider("Proporción de Salario del Personal ($\u03B1_{SAL\_PER}$)", min_value=0.0, max_value=1.0, value=0.1, step=0.01)
-    alpha_ALQ_MAN_value = st.sidebar.slider("Proporción de Alquiler y Mantenimiento ($\u03B1_{ALQ\_MAN}$)", min_value=0.0, max_value=1.0, value=0.1, step=0.01)
-    alpha_SER_BAS_value = st.sidebar.slider("Proporción de Servicios Básicos ($\u03B1_{SER\_BAS}$)", min_value=0.0, max_value=1.0, value=0.1, step=0.01)
-    alpha_CLC_value = st.sidebar.slider("Proporción de Costos Legales de Consultoría ($\u03B1_{CLC}$)", min_value=0.0, max_value=1.0, value=0.1, step=0.01)
-    alpha_PUB_MAR_value = st.sidebar.slider("Proporción de Publicidad y Marketing ($\u03B1_{PUB\_MAR}$)", min_value=0.0, max_value=1.0, value=0.1, step=0.01)
-    alpha_COM_VEN_value = st.sidebar.slider("Proporción de Comisiones de Ventas ($\u03B1_{COM\_VEN}$)", min_value=0.0, max_value=1.0, value=0.1, step=0.01)
-    alpha_EFC_value = st.sidebar.slider("Proporción de Eventos y Ferias Comerciales ($\u03B1_{EFC}$)", min_value=0.0, max_value=1.0, value=0.1, step=0.01)
-    alpha_GAS_OFI_value = st.sidebar.slider("Proporción de Gastos de Oficina ($\u03B1_{GAS\_OFI}$)", min_value=0.0, max_value=1.0, value=0.1, step=0.01)
-    
-    # Sustituciones en el modelo
-    control_variables = {
-        alpha_INT: alpha_INT_value,
-        alpha_MOR: alpha_MOR_value,
-        alpha_DES: alpha_DES_value,
-        alpha_ING_CUR: alpha_ING_CUR_value,
-        alpha_ING_SEG: alpha_ING_SEG_value,
-        alpha_COS_FON: alpha_COS_FON_value,
-        alpha_DEP: alpha_DEP_value,
-        alpha_PRO: alpha_PRO_value,
-        alpha_SAL_PER: alpha_SAL_PER_value,
-        alpha_ALQ_MAN: alpha_ALQ_MAN_value,
-        alpha_SER_BAS: alpha_SER_BAS_value,
-        alpha_CLC: alpha_CLC_value,
-        alpha_PUB_MAR: alpha_PUB_MAR_value,
-        alpha_COM_VEN: alpha_COM_VEN_value,
-        alpha_EFC: alpha_EFC_value,
-        alpha_GAS_OFI: alpha_GAS_OFI_value,
+    alpha_values = {
+        alpha_INT : st.sidebar.slider("Proporción de Tasa de Interés ($\u03B1_{INT}$)", min_value=0.0, max_value=1.0, value=0.1, step=0.01),
+        alpha_MOR : st.sidebar.slider("Proporción de Tasa de Mora ($\u03B1_{MOR}$)", min_value=0.0, max_value=1.0, value=0.1, step=0.01),
+        alpha_DES : st.sidebar.slider("Proporción de Tasa de Desgravamen ($\u03B1_{DES}$)", min_value=0.0, max_value=1.0, value=0.1, step=0.01),
+        alpha_ING_CUR : st.sidebar.slider("Proporción de Ingresos por Cursos ($\u03B1_{ING\_CUR}$)", min_value=0.0, max_value=1.0, value=0.1, step=0.01),
+        alpha_ING_SEG : st.sidebar.slider("Proporción de Ingresos por Seguros ($\u03B1_{ING\_SEG}$)", min_value=0.0, max_value=1.0, value=0.1, step=0.01),
+        alpha_COS_FON : st.sidebar.slider("Proporción del Costo de Fondeo ($\u03B1_{COS\_FON}$)", min_value=0.0, max_value=1.0, value=0.1, step=0.01),
+        alpha_DEP : st.sidebar.slider("Proporción de Depósitos ($\u03B1_{DEP}$)", min_value=0.0, max_value=1.0, value=0.1, step=0.01),
+        alpha_PRO : st.sidebar.slider("Proporción de Provisión ($\u03B1_{PRO}$)", min_value=0.0, max_value=1.0, value=0.1, step=0.01),
+        alpha_SAL_PER : st.sidebar.slider("Proporción de Salario del Personal ($\u03B1_{SAL\_PER}$)", min_value=0.0, max_value=1.0, value=0.1, step=0.01),
+        alpha_ALQ_MAN : st.sidebar.slider("Proporción de Alquiler y Mantenimiento ($\u03B1_{ALQ\_MAN}$)", min_value=0.0, max_value=1.0, value=0.1, step=0.01),
+        alpha_SER_BAS : st.sidebar.slider("Proporción de Servicios Básicos ($\u03B1_{SER\_BAS}$)", min_value=0.0, max_value=1.0, value=0.1, step=0.01),
+        alpha_CLC : st.sidebar.slider("Proporción de Costos Legales de Consultoría ($\u03B1_{CLC}$)", min_value=0.0, max_value=1.0, value=0.1, step=0.01),
+        alpha_PUB_MAR : st.sidebar.slider("Proporción de Publicidad y Marketing ($\u03B1_{PUB\_MAR}$)", min_value=0.0, max_value=1.0, value=0.1, step=0.01),
+        alpha_COM_VEN : st.sidebar.slider("Proporción de Comisiones de Ventas ($\u03B1_{COM\_VEN}$)", min_value=0.0, max_value=1.0, value=0.1, step=0.01),
+        alpha_EFC : st.sidebar.slider("Proporción de Eventos y Ferias Comerciales ($\u03B1_{EFC}$)", min_value=0.0, max_value=1.0, value=0.1, step=0.01),
+        alpha_GAS_OFI : st.sidebar.slider("Proporción de Gastos de Oficina ($\u03B1_{GAS\_OFI}$)", min_value=0.0, max_value=1.0, value=0.1, step=0.01),
     }
 
-    # Resolver el sistema de ecuaciones
-    solutions = solve([eq.subs(control_variables) for eq in equations], endogenous_vars, dict=True)
+    # Sustituciones en el modelo
+    control_variables = {CAR: CAR_value, **alpha_values}
 
+    # Resolver el sistema de ecuaciones
+    output_variables = solve(equations, endogenous_vars)
+    
     # Manejo de escenarios guardados
     if "saved_scenarios" not in st.session_state:
         st.session_state.saved_scenarios = {}
@@ -126,8 +111,8 @@ with main_tabs[0]:
 
     # Función para guardar escenario actual
     def save_scenario():
-        if solutions:
-            scenario_data = {"Variables de resultado": solutions[0]}
+        if output_variables:
+            scenario_data = {"Variables de resultado": output_variables}
             scenario_data.update({"Variables de control": control_variables})
             st.session_state.saved_scenarios.update({scenario_name: scenario_data})
 
@@ -135,8 +120,49 @@ with main_tabs[0]:
     if st.button("Guardar Escenario"):
         save_scenario()
         st.success("Escenario guardado con éxito")
+        
+    # Mostrar resultados
+    data = {
+        "Monto": [
+            output_variables['TOT_ING'],
+            60000,
+            40000,
+            10000,
+            5000,
+            25000,
+            3000,
+            22000,
+            5000,
+            17000
+        ]
+    }
 
+    indices = [
+        "Ingresos Operativos",
+        "Costos Operativos",
+        "Utilidad Bruta",
+        "Gastos Administrativos",
+        "Gastos de Ventas",
+        "Utilidad Operativa",
+        "Gastos Financieros",
+        "Utilidad Antes de Impuestos",
+        "Impuestos",
+        "Utilidad Neta"
+    ]
 
+    estado_resultados = pd.DataFrame(data, index=indices)
+
+    # Título de la app
+    st.title("Estado de Resultados")
+
+    # Mostrar la tabla como un DataFrame interactivo (con índices como conceptos)
+    st.dataframe(estado_resultados, use_container_width=True)
+
+    # Mostrar la tabla como una tabla estática (con índices como conceptos)
+    st.table(estado_resultados)
+    
+
+    
 
 with main_tabs[1]:
     # Mostrar los escenarios guardados
