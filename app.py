@@ -8,19 +8,19 @@ import matplotlib.pyplot as plt
 st.title("DILE - Simulación")
 
 # Pestañas
-main_tabs = st.tabs(["Simulación", "Comparación",  "Información"])
+main_tabs = st.tabs(["Simulación", "Comparación", "Información"])
 
 with main_tabs[0]:
-    # Definir parámetros
+    # Establecer parámetros como variables simbólicas
     alpha_INT, alpha_MOR, alpha_DES, alpha_ING_CUR = symbols('alpha_INT alpha_MOR alpha_DES alpha_ING_CUR')
     alpha_ING_SEG, alpha_COS_FON, alpha_DEP, alpha_PRO = symbols('alpha_ING_SEG alpha_COS_FON alpha_DEP alpha_PRO')
     alpha_SAL_PER, alpha_ALQ_MAN, alpha_SER_BAS, alpha_CLC = symbols('alpha_SAL_PER alpha_ALQ_MAN alpha_SER_BAS alpha_CLC')
     alpha_PUB_MAR, alpha_COM_VEN, alpha_EFC, alpha_GAS_OFI = symbols('alpha_PUB_MAR alpha_COM_VEN alpha_EFC alpha_GAS_OFI')
 
-    # Definir variables exógenas
+    # Establecer variables exógenas como simbólicas
     CAR = symbols('CAR')
 
-    # Definir variables endógenas
+    # Establecer variables endógenas como simbólicas
     TOT_ING = symbols('TOT_ING')
     ING_FIN = symbols('ING_FIN')
     INT, MOR, DES = symbols('INT MOR DES')
@@ -30,6 +30,9 @@ with main_tabs[0]:
     GAS_ADM, SAL_PER, ALQ_MAN, SER_BAS, CLC = symbols('GAS_ADM SAL_PER ALQ_MAN SER_BAS CLC')
     GAS_OPE, PUB_MAR, COM_VEN, EFC, GAS_OFI = symbols('GAS_OPE PUB_MAR COM_VEN EFC GAS_OFI')
     UTI_NET = symbols('UTI_NET')
+
+    # Definir varibles endógenas
+    endogenous_vars = [TOT_ING, ING_FIN, INT, MOR, DES, ING_CUR, ING_SEG, TOT_GAS, COS_FON, DEP, PRO, UTI_BRU, GAS_ADM, SAL_PER, ALQ_MAN, SER_BAS, CLC, GAS_OPE, PUB_MAR, COM_VEN, EFC, GAS_OFI, UTI_NET]
 
     # Definir ecuaciones
     equations = [
@@ -58,25 +61,12 @@ with main_tabs[0]:
         Eq(UTI_NET, UTI_BRU - GAS_ADM - GAS_OPE),
     ]
 
-    # Resolver simbólicamente las variables endógenas en función de las demás
-    endogenous_vars = [TOT_ING, ING_FIN, INT, MOR, DES, ING_CUR, ING_SEG, TOT_GAS, COS_FON, DEP, PRO, UTI_BRU, GAS_ADM, SAL_PER, ALQ_MAN, SER_BAS, CLC, GAS_OPE, PUB_MAR, COM_VEN, EFC, GAS_OFI, UTI_NET]
-
-    # Crear un grafo de dependencias
-    graph = nx.DiGraph()
-
-    # Agregar nodos y relaciones
-    for eq in equations:
-        lhs = eq.lhs
-        rhs = eq.rhs
-        graph.add_node(str(lhs), type="endogenous")
-        for symbol in rhs.free_symbols:
-            graph.add_node(str(symbol), type="exogenous" if symbol in [CAR, alpha_INT, alpha_MOR, alpha_DES, alpha_ING_CUR, alpha_ING_SEG, alpha_COS_FON, alpha_DEP, alpha_PRO, alpha_SAL_PER, alpha_ALQ_MAN, alpha_SER_BAS, alpha_CLC, alpha_PUB_MAR, alpha_COM_VEN, alpha_EFC, alpha_GAS_OFI] else "parameter")
-            graph.add_edge(str(symbol), str(lhs))
-
     st.sidebar.header("Parámetros del Modelo")
 
-    # Entrada de usurio
+    # Entrada de valor para variables exógenas
     CAR_value = st.sidebar.number_input("Cartera ($CAR$)", value=1000000, step=100000)
+    
+    # Entrada de valor para parámetros
     alpha_values = {
         alpha_INT : st.sidebar.slider("Proporción de Tasa de Interés ($\u03B1_{INT}$)", min_value=0.0, max_value=1.0, value=0.1, step=0.01),
         alpha_MOR : st.sidebar.slider("Proporción de Tasa de Mora ($\u03B1_{MOR}$)", min_value=0.0, max_value=1.0, value=0.1, step=0.01),
@@ -96,12 +86,88 @@ with main_tabs[0]:
         alpha_GAS_OFI : st.sidebar.slider("Proporción de Gastos de Oficina ($\u03B1_{GAS\_OFI}$)", min_value=0.0, max_value=1.0, value=0.1, step=0.01),
     }
 
-    # Sustituciones en el modelo
+    # Asignación de valores a varibles exógenas y parámetros
     control_variables = {CAR: CAR_value, **alpha_values}
+    
+    # Conversión de un sistema de ecuaciones simbólico a uno numérico
+    numerical_equations_system = [eq.subs(control_variables) for eq in equations]
 
     # Resolver el sistema de ecuaciones
-    output_variables = solve(equations, endogenous_vars)
+    output_variables = solve(numerical_equations_system, endogenous_vars, dict=True)[0]    
+
+    # Mostrar tabla de resultads
+    if output_variables:
+        data = {
+            "Monto": [
+                control_variables[CAR],
+                output_variables[TOT_ING],
+                output_variables[ING_FIN],
+                output_variables[INT],
+                output_variables[MOR],
+                output_variables[DES],
+                output_variables[ING_CUR],
+                output_variables[ING_SEG],
+                output_variables[TOT_GAS],
+                output_variables[COS_FON],
+                output_variables[DEP],
+                output_variables[PRO],
+                output_variables[UTI_BRU],
+                output_variables[GAS_ADM],
+                output_variables[SAL_PER],
+                output_variables[SER_BAS],
+                output_variables[CLC],
+                output_variables[GAS_OPE],
+                output_variables[PUB_MAR],
+                output_variables[COM_VEN],
+                output_variables[EFC],
+                output_variables[GAS_OFI],
+                output_variables[UTI_NET],
+            ]
+        }
+
+    indices = [
+        "Cartera",
+        "Total de Ingresos",
+        "Ingresos Financieros",
+        "- Interés",
+        "- Mora",
+        "- Desgravamen",
+        "Ingresos por Cursos",
+        "Ingresos por Seguros",
+        "Total de Gastos",
+        "- Costo de Fondeo",
+        "* Depósitos",
+        "- Provisión",
+        "Utilidad Bruta",
+        "Gastos Administrativos",
+        "- Salario del Personal",
+        "- Alquiler y Mantenimiento",
+        "- Servicios Básicos",
+        "- Costos Legales de Consultoría",
+        "Gastos Operativos",
+        "- Publicidad y Marketing",
+        "- Eventos y Ferias Comerciales",
+        "- Gastos de Oficina",
+        "Utilidad Neta"
+    ]
+
+    estado_resultados = pd.DataFrame(data, index=indices)
+
+    # Mostrar la tabla como una tabla estática (con índices como conceptos)
+    st.table(estado_resultados)
     
+    # Crear un grafo de dependencias
+    graph = nx.DiGraph()
+
+    # Agregar nodos y relaciones
+    for eq in equations:
+        lhs = eq.lhs
+        rhs = eq.rhs
+        graph.add_node(str(lhs), type="endogenous")
+        for symbol in rhs.free_symbols:
+            graph.add_node(str(symbol), type="exogenous" if symbol in [CAR, alpha_INT, alpha_MOR, alpha_DES, alpha_ING_CUR, alpha_ING_SEG, alpha_COS_FON, alpha_DEP, alpha_PRO, alpha_SAL_PER, alpha_ALQ_MAN, alpha_SER_BAS, alpha_CLC, alpha_PUB_MAR, alpha_COM_VEN, alpha_EFC, alpha_GAS_OFI] else "parameter")
+            graph.add_edge(str(symbol), str(lhs))
+
     # Manejo de escenarios guardados
     if "saved_scenarios" not in st.session_state:
         st.session_state.saved_scenarios = {}
@@ -120,49 +186,7 @@ with main_tabs[0]:
     if st.button("Guardar Escenario"):
         save_scenario()
         st.success("Escenario guardado con éxito")
-        
-    # Mostrar resultados
-    data = {
-        "Monto": [
-            output_variables['TOT_ING'],
-            60000,
-            40000,
-            10000,
-            5000,
-            25000,
-            3000,
-            22000,
-            5000,
-            17000
-        ]
-    }
 
-    indices = [
-        "Ingresos Operativos",
-        "Costos Operativos",
-        "Utilidad Bruta",
-        "Gastos Administrativos",
-        "Gastos de Ventas",
-        "Utilidad Operativa",
-        "Gastos Financieros",
-        "Utilidad Antes de Impuestos",
-        "Impuestos",
-        "Utilidad Neta"
-    ]
-
-    estado_resultados = pd.DataFrame(data, index=indices)
-
-    # Título de la app
-    st.title("Estado de Resultados")
-
-    # Mostrar la tabla como un DataFrame interactivo (con índices como conceptos)
-    st.dataframe(estado_resultados, use_container_width=True)
-
-    # Mostrar la tabla como una tabla estática (con índices como conceptos)
-    st.table(estado_resultados)
-    
-
-    
 
 with main_tabs[1]:
     # Mostrar los escenarios guardados
@@ -189,6 +213,7 @@ with main_tabs[1]:
     else:
         st.write("No hay escenarios guardados.")
         
+
 with main_tabs[2]:
     
     # Mostrar tabla de información financiera
@@ -266,3 +291,4 @@ with main_tabs[2]:
     nx.draw(graph, pos, with_labels=True, node_color=colors, node_size=3000, font_size=10, font_weight="bold", arrowsize=20, edge_color="gray")
     plt.title("Dependencias entre Variables", fontsize=16)
     st.pyplot(plt)
+    
