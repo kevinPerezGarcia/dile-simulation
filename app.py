@@ -92,7 +92,10 @@ control_variables = {CAR: CAR_value, **alpha_values}
 numerical_equations_system = [eq.subs(control_variables) for eq in equations]
 
 # Resolver el sistema de ecuaciones
-output_variables = solve(numerical_equations_system, endogenous_vars, dict=True)[0]    
+output_variables = solve(numerical_equations_system, endogenous_vars, dict=True)[0]
+
+# Redondear resultados
+output_variables = {clave: int(valor) for clave, valor in output_variables.items()}
 
 with main_tabs[1]:
     # Mostrar tabla de resultads
@@ -171,21 +174,63 @@ with main_tabs[1]:
     # Manejo de escenarios guardados
     if "saved_scenarios" not in st.session_state:
         st.session_state.saved_scenarios = {}
-
-    # Nombrar escenario
-    scenario_name = st.text_input("Nombre del escenario: ")
-
-    # Función para guardar escenario actual
-    def save_scenario():
-        if output_variables:
-            scenario_data = {"Variables de resultado": output_variables}
-            scenario_data.update({"Variables de control": control_variables})
-            st.session_state.saved_scenarios.update({scenario_name: scenario_data})
-
-    # Botón para guardar escenario
+        
+    # Control par habilitar el cuadro de texto después de presionar el botón
+    if "save_mode" not in st.session_state:
+        st.session_state.save_mode = False
+        
+    # Botón para iniciar el proceso de guardar
     if st.button("Guardar Escenario"):
-        save_scenario()
-        st.success("Escenario guardado con éxito")
+        st.session_state.save_mode = True # Activa el modo de guardar
+        
+    # Si está activo el modo de guardar, mostrar el cuadro de texto
+    if st.session_state.save_mode:
+        scenario_to_save = st.text_input("Nombre del escenario a guardar:")
+    
+        # Validar si se ha ingresado un nombre
+        if scenario_to_save:
+            if scenario_to_save in st.session_state.saved_scenarios:
+                st.error(f"El escenario '{scenario_to_save}' ya existe.")
+            else:
+                # Guardar el nuevo escenario
+                scenario_data = {
+                    "Variables de resultado": output_variables,
+                    "Variables de control": control_variables
+                }
+                st.session_state.saved_scenarios[scenario_to_save] = scenario_data
+                st.success(f"El escenario '{scenario_to_save}' ha sido guardado.")
+                st.session_state.save_mode = False  # Salir del modo de guardar
+
+    # Mostrar escenarios
+    def write_scenarios():
+        st.markdown(f"Escenarios guardados: {list(st.session_state.saved_scenarios.keys())}")
+        
+    # Botón para mostrar escenarios
+    if st.button("Mostrar Escenarios"):
+        write_scenarios()
+        
+# Control para habilitar el cuadro de texto después de presionar el botón
+if "delete_mode" not in st.session_state:
+    st.session_state.delete_mode = False
+
+# Botón para iniciar el proceso de eliminación
+if st.button("Quitar Escenario"):
+    st.session_state.delete_mode = True  # Activa el modo de eliminación
+
+# Si está activo el modo de eliminación, mostrar cuadro de texto
+if st.session_state.delete_mode:
+    scenario_to_drop = st.text_input("Nombre del escenario a quitar:")
+
+    # Validar si se ha ingresado una clave
+    if scenario_to_drop:
+        if scenario_to_drop in st.session_state.saved_scenarios:
+            # Eliminar escenario
+            del st.session_state.saved_scenarios[scenario_to_drop]
+            st.success(f"El escenario '{scenario_to_drop}' ha sido eliminado.")
+            st.session_state.delete_mode = False  # Salir del modo de eliminación
+        else:
+            st.error(f"La clave '{scenario_to_drop}' no existe.")
+            # Mantener el modo activo para intentar otra clave
 
 
 with main_tabs[2]:
@@ -194,16 +239,17 @@ with main_tabs[2]:
 
     # Verificar si hay escenarios guardados
     if st.session_state.saved_scenarios:
+        pass
         
         # Mostar tabla de control
         
         
         # Mostrar tabla de resultados
-        scenario_dict = st.session_state.saved_scenarios[scenario_name]["Variables de resultado"]
-        scenario_df = pd.DataFrame(scenario_dict, index=[scenario_name])
+        #scenario_dict = st.session_state.saved_scenarios[scenario_to_save]["Variables de resultado"]
+        #scenario_df = pd.DataFrame(scenario_dict, index=[scenario_to_save])
         #TODO Renombrar nombre de las variables por algo más explicativos como el del estado de resultados
         
-        st.dataframe(scenario_df.T)
+        #st.dataframe(scenario_df.T)
             
         # Mostrar tabla de composición
         
