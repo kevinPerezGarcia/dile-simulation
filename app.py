@@ -97,169 +97,8 @@ output_variables = solve(numerical_equations_system, endogenous_vars, dict=True)
 # Redondear resultados
 output_variables = {clave: int(valor) for clave, valor in output_variables.items()}
 
-with main_tabs[1]:
-    # Mostrar tabla de resultads
-    if output_variables:
-        data = {
-            "Monto": [
-                control_variables[CAR],
-                output_variables[TOT_ING],
-                output_variables[ING_FIN],
-                output_variables[INT],
-                output_variables[MOR],
-                output_variables[DES],
-                output_variables[ING_CUR],
-                output_variables[ING_SEG],
-                output_variables[TOT_GAS],
-                output_variables[COS_FON],
-                output_variables[DEP],
-                output_variables[PRO],
-                output_variables[UTI_BRU],
-                output_variables[GAS_ADM],
-                output_variables[SAL_PER],
-                output_variables[SER_BAS],
-                output_variables[CLC],
-                output_variables[GAS_OPE],
-                output_variables[PUB_MAR],
-                output_variables[COM_VEN],
-                output_variables[EFC],
-                output_variables[GAS_OFI],
-                output_variables[UTI_NET],
-            ]
-        }
 
-    indices = [
-        "Cartera",
-        "Total de Ingresos",
-        "Ingresos Financieros",
-        "- Interés",
-        "- Mora",
-        "- Desgravamen",
-        "Ingresos por Cursos",
-        "Ingresos por Seguros",
-        "Total de Gastos",
-        "- Costo de Fondeo",
-        "* Depósitos",
-        "- Provisión",
-        "Utilidad Bruta",
-        "Gastos Administrativos",
-        "- Salario del Personal",
-        "- Alquiler y Mantenimiento",
-        "- Servicios Básicos",
-        "- Costos Legales de Consultoría",
-        "Gastos Operativos",
-        "- Publicidad y Marketing",
-        "- Eventos y Ferias Comerciales",
-        "- Gastos de Oficina",
-        "Utilidad Neta"
-    ]
-
-    estado_resultados = pd.DataFrame(data, index=indices)
-
-    # Mostrar la tabla como una tabla estática (con índices como conceptos)
-    st.table(estado_resultados)
-    
-    # Crear un grafo de dependencias
-    graph = nx.DiGraph()
-
-    # Agregar nodos y relaciones
-    for eq in equations:
-        lhs = eq.lhs
-        rhs = eq.rhs
-        graph.add_node(str(lhs), type="endogenous")
-        for symbol in rhs.free_symbols:
-            graph.add_node(str(symbol), type="exogenous" if symbol in [CAR, alpha_INT, alpha_MOR, alpha_DES, alpha_ING_CUR, alpha_ING_SEG, alpha_COS_FON, alpha_DEP, alpha_PRO, alpha_SAL_PER, alpha_ALQ_MAN, alpha_SER_BAS, alpha_CLC, alpha_PUB_MAR, alpha_COM_VEN, alpha_EFC, alpha_GAS_OFI] else "parameter")
-            graph.add_edge(str(symbol), str(lhs))
-
-    # Manejo de escenarios guardados
-    if "saved_scenarios" not in st.session_state:
-        st.session_state.saved_scenarios = {}
-        
-    # Control par habilitar el cuadro de texto después de presionar el botón
-    if "save_mode" not in st.session_state:
-        st.session_state.save_mode = False
-        
-    # Botón para iniciar el proceso de guardar
-    if st.button("Guardar Escenario"):
-        st.session_state.save_mode = True # Activa el modo de guardar
-        
-    # Si está activo el modo de guardar, mostrar el cuadro de texto
-    if st.session_state.save_mode:
-        scenario_to_save = st.text_input("Nombre del escenario a guardar:")
-    
-        # Validar si se ha ingresado un nombre
-        if scenario_to_save:
-            if scenario_to_save in st.session_state.saved_scenarios:
-                st.error(f"El escenario '{scenario_to_save}' ya existe.")
-            else:
-                # Guardar el nuevo escenario
-                scenario_data = {
-                    "Variables de resultado": output_variables,
-                    "Variables de control": control_variables
-                }
-                st.session_state.saved_scenarios[scenario_to_save] = scenario_data
-                st.success(f"El escenario '{scenario_to_save}' ha sido guardado.")
-                st.session_state.save_mode = False  # Salir del modo de guardar
-
-    # Mostrar escenarios
-    def write_scenarios():
-        st.markdown(f"Escenarios guardados: {list(st.session_state.saved_scenarios.keys())}")
-        
-    # Botón para mostrar escenarios
-    if st.button("Mostrar Escenarios"):
-        write_scenarios()
-        
-# Control para habilitar el cuadro de texto después de presionar el botón
-if "delete_mode" not in st.session_state:
-    st.session_state.delete_mode = False
-
-# Botón para iniciar el proceso de eliminación
-if st.button("Quitar Escenario"):
-    st.session_state.delete_mode = True  # Activa el modo de eliminación
-
-# Si está activo el modo de eliminación, mostrar cuadro de texto
-if st.session_state.delete_mode:
-    scenario_to_drop = st.text_input("Nombre del escenario a quitar:")
-
-    # Validar si se ha ingresado una clave
-    if scenario_to_drop:
-        if scenario_to_drop in st.session_state.saved_scenarios:
-            # Eliminar escenario
-            del st.session_state.saved_scenarios[scenario_to_drop]
-            st.success(f"El escenario '{scenario_to_drop}' ha sido eliminado.")
-            st.session_state.delete_mode = False  # Salir del modo de eliminación
-        else:
-            st.error(f"La clave '{scenario_to_drop}' no existe.")
-            # Mantener el modo activo para intentar otra clave
-
-
-with main_tabs[2]:
-    # Mostrar los escenarios guardados
-    st.subheader("Escenarios Guardados")
-
-    # Verificar si hay escenarios guardados
-    if st.session_state.saved_scenarios:
-        pass
-        
-        # Mostar tabla de control
-        
-        
-        # Mostrar tabla de resultados
-        #scenario_dict = st.session_state.saved_scenarios[scenario_to_save]["Variables de resultado"]
-        #scenario_df = pd.DataFrame(scenario_dict, index=[scenario_to_save])
-        #TODO Renombrar nombre de las variables por algo más explicativos como el del estado de resultados
-        
-        #st.dataframe(scenario_df.T)
-            
-        # Mostrar tabla de composición
-        
-        # Mostrar tabla de métricas
-        
-        # Mostrar gráfico de radar sobre métricas
-    else:
-        st.write("No hay escenarios guardados.")
-        
-
+# Pestaña de Información
 with main_tabs[0]:
     
     # Mostrar tabla de información financiera
@@ -330,6 +169,18 @@ with main_tabs[0]:
         - Representan las relaciones de dependencia entre variables.
     """)
 
+    # Crear un grafo de dependencias
+    graph = nx.DiGraph()
+
+    # Agregar nodos y relaciones
+    for eq in equations:
+        lhs = eq.lhs
+        rhs = eq.rhs
+        graph.add_node(str(lhs), type="endogenous")
+        for symbol in rhs.free_symbols:
+            graph.add_node(str(symbol), type="exogenous" if symbol in [CAR, alpha_INT, alpha_MOR, alpha_DES, alpha_ING_CUR, alpha_ING_SEG, alpha_COS_FON, alpha_DEP, alpha_PRO, alpha_SAL_PER, alpha_ALQ_MAN, alpha_SER_BAS, alpha_CLC, alpha_PUB_MAR, alpha_COM_VEN, alpha_EFC, alpha_GAS_OFI] else "parameter")
+            graph.add_edge(str(symbol), str(lhs))
+
     # Dibujar el grafo
     plt.figure(figsize=(12, 8))
     pos = nx.spring_layout(graph)
@@ -337,4 +188,184 @@ with main_tabs[0]:
     nx.draw(graph, pos, with_labels=True, node_color=colors, node_size=3000, font_size=10, font_weight="bold", arrowsize=20, edge_color="gray")
     plt.title("Dependencias entre Variables", fontsize=16)
     st.pyplot(plt)
+
+
+# Pestaña de Simulación
+with main_tabs[1]:
+    # Mostrar tabla de resultads
+    if output_variables:
+        data = {
+            "Monto": [
+                control_variables[CAR],
+                output_variables[TOT_ING],
+                output_variables[ING_FIN],
+                output_variables[INT],
+                output_variables[MOR],
+                output_variables[DES],
+                output_variables[ING_CUR],
+                output_variables[ING_SEG],
+                output_variables[TOT_GAS],
+                output_variables[COS_FON],
+                output_variables[DEP],
+                output_variables[PRO],
+                output_variables[UTI_BRU],
+                output_variables[GAS_ADM],
+                output_variables[SAL_PER],
+                output_variables[SER_BAS],
+                output_variables[CLC],
+                output_variables[GAS_OPE],
+                output_variables[PUB_MAR],
+                output_variables[COM_VEN],
+                output_variables[EFC],
+                output_variables[GAS_OFI],
+                output_variables[UTI_NET],
+            ]
+        }
+
+    indices = [
+        "Cartera",
+        "Total de Ingresos",
+        "Ingresos Financieros",
+        "- Interés",
+        "- Mora",
+        "- Desgravamen",
+        "Ingresos por Cursos",
+        "Ingresos por Seguros",
+        "Total de Gastos",
+        "- Costo de Fondeo",
+        "* Depósitos",
+        "- Provisión",
+        "Utilidad Bruta",
+        "Gastos Administrativos",
+        "- Salario del Personal",
+        "- Alquiler y Mantenimiento",
+        "- Servicios Básicos",
+        "- Costos Legales de Consultoría",
+        "Gastos Operativos",
+        "- Publicidad y Marketing",
+        "- Eventos y Ferias Comerciales",
+        "- Gastos de Oficina",
+        "Utilidad Neta"
+    ]
+
+    estado_resultados = pd.DataFrame(data, index=indices)
+
+    # Mostrar la tabla como una tabla estática (con índices como conceptos)
+    st.table(estado_resultados)
+
+    # Manejo de escenarios guardados
+    if "saved_scenarios" not in st.session_state:
+        st.session_state.saved_scenarios = {}
+        
+    # Control par habilitar el cuadro de texto después de presionar el botón
+    if "save_mode" not in st.session_state:
+        st.session_state.save_mode = False
+        
+    # Botón para iniciar el proceso de guardar
+    if st.button("Guardar Escenario"):
+        st.session_state.save_mode = True # Activa el modo de guardar
+        
+    # Si está activo el modo de guardar, mostrar el cuadro de texto
+    if st.session_state.save_mode:
+        scenario_to_save = st.text_input("Nombre del escenario a guardar:")
     
+        # Validar si se ha ingresado un nombre
+        if scenario_to_save:
+            if scenario_to_save in st.session_state.saved_scenarios:
+                st.error(f"El escenario '{scenario_to_save}' ya existe.")
+            else:
+                # Guardar el nuevo escenario
+                scenario_data = {
+                    "Variables de resultado": output_variables,
+                    "Variables de control": control_variables
+                }
+                st.session_state.saved_scenarios[scenario_to_save] = scenario_data
+                st.success(f"El escenario '{scenario_to_save}' ha sido guardado.")
+                st.session_state.save_mode = False  # Salir del modo de guardar
+
+    # Mostrar escenarios
+    def write_scenarios():
+        st.markdown(f"Escenarios guardados: {list(st.session_state.saved_scenarios.keys())}")
+        
+    # Botón para mostrar escenarios
+    if st.button("Mostrar Escenarios"):
+        write_scenarios()
+        
+    # Control para habilitar el cuadro de texto después de presionar el botón
+    if "delete_mode" not in st.session_state:
+        st.session_state.delete_mode = False
+
+    # Botón para iniciar el proceso de eliminación
+    if st.button("Quitar Escenario"):
+        st.session_state.delete_mode = True  # Activa el modo de eliminación
+
+    # Si está activo el modo de eliminación, mostrar cuadro de texto
+    if st.session_state.delete_mode:
+        scenario_to_drop = st.text_input("Nombre del escenario a quitar:")
+
+        # Validar si se ha ingresado una clave
+        if scenario_to_drop:
+            if scenario_to_drop in st.session_state.saved_scenarios:
+                # Eliminar escenario
+                del st.session_state.saved_scenarios[scenario_to_drop]
+                st.success(f"El escenario '{scenario_to_drop}' ha sido eliminado.")
+                st.session_state.delete_mode = False  # Salir del modo de eliminación
+            else:
+                st.error(f"La clave '{scenario_to_drop}' no existe.")
+                # Mantener el modo activo para intentar otra clave
+
+
+# Pestaña de Comparación
+with main_tabs[2]:
+
+    # Verificar si hay escenarios guardados
+    if st.session_state.saved_scenarios:
+        # Comparar resultados
+        st.subheader("Comparación de resultados")
+        
+        indices_resultados = [
+        "Cartera", "Total de Ingresos", "Ingresos Financieros", "- Interés", "- Mora", "- Desgravamen",
+        "Ingresos por Cursos", "Ingresos por Seguros", "Total de Gastos", "- Costo de Fondeo", "* Depósitos",
+        "- Provisión", "Utilidad Bruta", "Gastos Administrativos", "- Salario del Personal",
+        "- Alquiler y Mantenimiento", "- Servicios Básicos", "- Costos Legales de Consultoría",
+        "Gastos Operativos", "- Publicidad y Marketing", "- Eventos y Ferias Comerciales",
+        "- Gastos de Oficina", "Utilidad Neta"
+        ]
+
+        # Crear DataFrame para Variables de resultado
+        variables_resultado = {}
+        for escenario, datos in st.session_state.saved_scenarios.items():
+            if "Variables de resultado" not in datos:
+                raise ValueError(f"El escenario '{escenario}' no tiene 'Variables de resultado'.")
+            variables_resultado[escenario] = [
+                datos["Variables de resultado"].get(variable, None) for variable in endogenous_vars
+            ]
+
+        df_resultados = pd.DataFrame(variables_resultado, index=indices_resultados)
+
+        st.table(df_resultados)
+            
+        # Comparar variables exógenas y parámetros
+        st.subheader("Comparación de variables exógenas y parámetros")
+        
+        indices_control = [
+        "CARTERA", "alpha_INT", "alpha_MOR", "alpha_DES", "alpha_ING_CUR", "alpha_ING_SEG", "alpha_COS_FON",
+        "alpha_DEP", "alpha_PRO", "alpha_SAL_PER", "alpha_ALQ_MAN", "alpha_SER_BAS", "alpha_CLC",
+        "alpha_PUB_MAR", "alpha_COM_VEN", "alpha_EFC", "alpha_GAS_OFI"
+        ]
+        
+        # Crear DataFrame para Variables de control
+        variables_control = {}
+        for escenario, datos in st.session_state.saved_scenarios.items():
+            if "Variables de control" not in datos:
+                raise ValueError(f"El escenario '{escenario}' no tiene 'Variables de control'.")
+            variables_control[escenario] = [
+                datos["Variables de control"].get(parametro, None) for parametro in control_variables
+            ]
+
+        df_control = pd.DataFrame(variables_control, index=indices_control)
+        
+        st.table(df_control)
+        
+    else:
+        st.error("No hay escenarios guardados.")
