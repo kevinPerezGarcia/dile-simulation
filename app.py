@@ -8,93 +8,93 @@ import matplotlib.pyplot as plt
 st.title("DILE - Simulación")
 
 # Pestañas
-main_tabs = st.tabs(["Simulación", "Comparación", "Información"])
+main_tabs = st.tabs(["Información", "Simulación", "Comparación"])
 
-with main_tabs[0]:
-    # Establecer parámetros como variables simbólicas
-    alpha_INT, alpha_MOR, alpha_DES, alpha_ING_CUR = symbols('alpha_INT alpha_MOR alpha_DES alpha_ING_CUR')
-    alpha_ING_SEG, alpha_COS_FON, alpha_DEP, alpha_PRO = symbols('alpha_ING_SEG alpha_COS_FON alpha_DEP alpha_PRO')
-    alpha_SAL_PER, alpha_ALQ_MAN, alpha_SER_BAS, alpha_CLC = symbols('alpha_SAL_PER alpha_ALQ_MAN alpha_SER_BAS alpha_CLC')
-    alpha_PUB_MAR, alpha_COM_VEN, alpha_EFC, alpha_GAS_OFI = symbols('alpha_PUB_MAR alpha_COM_VEN alpha_EFC alpha_GAS_OFI')
+# Establecer parámetros como variables simbólicas
+alpha_INT, alpha_MOR, alpha_DES, alpha_ING_CUR = symbols('alpha_INT alpha_MOR alpha_DES alpha_ING_CUR')
+alpha_ING_SEG, alpha_COS_FON, alpha_DEP, alpha_PRO = symbols('alpha_ING_SEG alpha_COS_FON alpha_DEP alpha_PRO')
+alpha_SAL_PER, alpha_ALQ_MAN, alpha_SER_BAS, alpha_CLC = symbols('alpha_SAL_PER alpha_ALQ_MAN alpha_SER_BAS alpha_CLC')
+alpha_PUB_MAR, alpha_COM_VEN, alpha_EFC, alpha_GAS_OFI = symbols('alpha_PUB_MAR alpha_COM_VEN alpha_EFC alpha_GAS_OFI')
 
-    # Establecer variables exógenas como simbólicas
-    CAR = symbols('CAR')
+# Establecer variables exógenas como simbólicas
+CAR = symbols('CAR')
 
-    # Establecer variables endógenas como simbólicas
-    TOT_ING = symbols('TOT_ING')
-    ING_FIN = symbols('ING_FIN')
-    INT, MOR, DES = symbols('INT MOR DES')
-    ING_CUR, ING_SEG = symbols('ING_CUR ING_SEG')
-    TOT_GAS, COS_FON, DEP, PRO = symbols('TOT_GAS COS_FON DEP PRO')
-    UTI_BRU = symbols('UTI_BRU')
-    GAS_ADM, SAL_PER, ALQ_MAN, SER_BAS, CLC = symbols('GAS_ADM SAL_PER ALQ_MAN SER_BAS CLC')
-    GAS_OPE, PUB_MAR, COM_VEN, EFC, GAS_OFI = symbols('GAS_OPE PUB_MAR COM_VEN EFC GAS_OFI')
-    UTI_NET = symbols('UTI_NET')
+# Establecer variables endógenas como simbólicas
+TOT_ING = symbols('TOT_ING')
+ING_FIN = symbols('ING_FIN')
+INT, MOR, DES = symbols('INT MOR DES')
+ING_CUR, ING_SEG = symbols('ING_CUR ING_SEG')
+TOT_GAS, COS_FON, DEP, PRO = symbols('TOT_GAS COS_FON DEP PRO')
+UTI_BRU = symbols('UTI_BRU')
+GAS_ADM, SAL_PER, ALQ_MAN, SER_BAS, CLC = symbols('GAS_ADM SAL_PER ALQ_MAN SER_BAS CLC')
+GAS_OPE, PUB_MAR, COM_VEN, EFC, GAS_OFI = symbols('GAS_OPE PUB_MAR COM_VEN EFC GAS_OFI')
+UTI_NET = symbols('UTI_NET')
 
-    # Definir varibles endógenas
-    endogenous_vars = [TOT_ING, ING_FIN, INT, MOR, DES, ING_CUR, ING_SEG, TOT_GAS, COS_FON, DEP, PRO, UTI_BRU, GAS_ADM, SAL_PER, ALQ_MAN, SER_BAS, CLC, GAS_OPE, PUB_MAR, COM_VEN, EFC, GAS_OFI, UTI_NET]
+# Definir varibles endógenas
+endogenous_vars = [TOT_ING, ING_FIN, INT, MOR, DES, ING_CUR, ING_SEG, TOT_GAS, COS_FON, DEP, PRO, UTI_BRU, GAS_ADM, SAL_PER, ALQ_MAN, SER_BAS, CLC, GAS_OPE, PUB_MAR, COM_VEN, EFC, GAS_OFI, UTI_NET]
 
-    # Definir ecuaciones
-    equations = [
-        Eq(TOT_ING, ING_FIN + ING_CUR + ING_SEG),
-        Eq(ING_FIN, INT + MOR + DES),
-        Eq(INT, alpha_INT * CAR),
-        Eq(MOR, alpha_MOR * CAR),
-        Eq(DES, alpha_DES * CAR),
-        Eq(ING_CUR, alpha_ING_CUR * CAR),
-        Eq(ING_SEG, alpha_ING_SEG * CAR),
-        Eq(TOT_GAS, DEP + COS_FON + PRO),
-        Eq(COS_FON, alpha_COS_FON * DEP),
-        Eq(DEP, alpha_DEP * CAR),
-        Eq(PRO, alpha_PRO * CAR),
-        Eq(UTI_BRU, TOT_ING - TOT_GAS),
-        Eq(GAS_ADM, SAL_PER + ALQ_MAN + SER_BAS + CLC),
-        Eq(SAL_PER, alpha_SAL_PER * ING_FIN),
-        Eq(ALQ_MAN, alpha_ALQ_MAN * ING_FIN),
-        Eq(SER_BAS, alpha_SER_BAS * ING_FIN),
-        Eq(CLC, alpha_CLC * ING_FIN),
-        Eq(GAS_OPE, PUB_MAR + COM_VEN + EFC + GAS_OFI),
-        Eq(PUB_MAR, alpha_PUB_MAR * ING_FIN),
-        Eq(COM_VEN, alpha_COM_VEN * ING_FIN),
-        Eq(EFC, alpha_EFC * ING_FIN),
-        Eq(GAS_OFI, alpha_GAS_OFI * ING_FIN),
-        Eq(UTI_NET, UTI_BRU - GAS_ADM - GAS_OPE),
-    ]
+# Definir ecuaciones
+equations = [
+    Eq(TOT_ING, ING_FIN + ING_CUR + ING_SEG),
+    Eq(ING_FIN, INT + MOR + DES),
+    Eq(INT, alpha_INT * CAR),
+    Eq(MOR, alpha_MOR * CAR),
+    Eq(DES, alpha_DES * CAR),
+    Eq(ING_CUR, alpha_ING_CUR * CAR),
+    Eq(ING_SEG, alpha_ING_SEG * CAR),
+    Eq(TOT_GAS, DEP + COS_FON + PRO),
+    Eq(COS_FON, alpha_COS_FON * DEP),
+    Eq(DEP, alpha_DEP * CAR),
+    Eq(PRO, alpha_PRO * CAR),
+    Eq(UTI_BRU, TOT_ING - TOT_GAS),
+    Eq(GAS_ADM, SAL_PER + ALQ_MAN + SER_BAS + CLC),
+    Eq(SAL_PER, alpha_SAL_PER * ING_FIN),
+    Eq(ALQ_MAN, alpha_ALQ_MAN * ING_FIN),
+    Eq(SER_BAS, alpha_SER_BAS * ING_FIN),
+    Eq(CLC, alpha_CLC * ING_FIN),
+    Eq(GAS_OPE, PUB_MAR + COM_VEN + EFC + GAS_OFI),
+    Eq(PUB_MAR, alpha_PUB_MAR * ING_FIN),
+    Eq(COM_VEN, alpha_COM_VEN * ING_FIN),
+    Eq(EFC, alpha_EFC * ING_FIN),
+    Eq(GAS_OFI, alpha_GAS_OFI * ING_FIN),
+    Eq(UTI_NET, UTI_BRU - GAS_ADM - GAS_OPE),
+]
 
-    st.sidebar.header("Parámetros del Modelo")
+st.sidebar.header("Parámetros del Modelo")
 
-    # Entrada de valor para variables exógenas
-    CAR_value = st.sidebar.number_input("Cartera ($CAR$)", value=1000000, step=100000)
-    
-    # Entrada de valor para parámetros
-    alpha_values = {
-        alpha_INT : st.sidebar.slider("Proporción de Tasa de Interés ($\u03B1_{INT}$)", min_value=0.0, max_value=1.0, value=0.1, step=0.01),
-        alpha_MOR : st.sidebar.slider("Proporción de Tasa de Mora ($\u03B1_{MOR}$)", min_value=0.0, max_value=1.0, value=0.1, step=0.01),
-        alpha_DES : st.sidebar.slider("Proporción de Tasa de Desgravamen ($\u03B1_{DES}$)", min_value=0.0, max_value=1.0, value=0.1, step=0.01),
-        alpha_ING_CUR : st.sidebar.slider("Proporción de Ingresos por Cursos ($\u03B1_{ING\_CUR}$)", min_value=0.0, max_value=1.0, value=0.1, step=0.01),
-        alpha_ING_SEG : st.sidebar.slider("Proporción de Ingresos por Seguros ($\u03B1_{ING\_SEG}$)", min_value=0.0, max_value=1.0, value=0.1, step=0.01),
-        alpha_COS_FON : st.sidebar.slider("Proporción del Costo de Fondeo ($\u03B1_{COS\_FON}$)", min_value=0.0, max_value=1.0, value=0.1, step=0.01),
-        alpha_DEP : st.sidebar.slider("Proporción de Depósitos ($\u03B1_{DEP}$)", min_value=0.0, max_value=1.0, value=0.1, step=0.01),
-        alpha_PRO : st.sidebar.slider("Proporción de Provisión ($\u03B1_{PRO}$)", min_value=0.0, max_value=1.0, value=0.1, step=0.01),
-        alpha_SAL_PER : st.sidebar.slider("Proporción de Salario del Personal ($\u03B1_{SAL\_PER}$)", min_value=0.0, max_value=1.0, value=0.1, step=0.01),
-        alpha_ALQ_MAN : st.sidebar.slider("Proporción de Alquiler y Mantenimiento ($\u03B1_{ALQ\_MAN}$)", min_value=0.0, max_value=1.0, value=0.1, step=0.01),
-        alpha_SER_BAS : st.sidebar.slider("Proporción de Servicios Básicos ($\u03B1_{SER\_BAS}$)", min_value=0.0, max_value=1.0, value=0.1, step=0.01),
-        alpha_CLC : st.sidebar.slider("Proporción de Costos Legales de Consultoría ($\u03B1_{CLC}$)", min_value=0.0, max_value=1.0, value=0.1, step=0.01),
-        alpha_PUB_MAR : st.sidebar.slider("Proporción de Publicidad y Marketing ($\u03B1_{PUB\_MAR}$)", min_value=0.0, max_value=1.0, value=0.1, step=0.01),
-        alpha_COM_VEN : st.sidebar.slider("Proporción de Comisiones de Ventas ($\u03B1_{COM\_VEN}$)", min_value=0.0, max_value=1.0, value=0.1, step=0.01),
-        alpha_EFC : st.sidebar.slider("Proporción de Eventos y Ferias Comerciales ($\u03B1_{EFC}$)", min_value=0.0, max_value=1.0, value=0.1, step=0.01),
-        alpha_GAS_OFI : st.sidebar.slider("Proporción de Gastos de Oficina ($\u03B1_{GAS\_OFI}$)", min_value=0.0, max_value=1.0, value=0.1, step=0.01),
-    }
+# Entrada de valor para variables exógenas
+CAR_value = st.sidebar.number_input("Cartera ($CAR$)", value=1000000, step=100000)
 
-    # Asignación de valores a varibles exógenas y parámetros
-    control_variables = {CAR: CAR_value, **alpha_values}
-    
-    # Conversión de un sistema de ecuaciones simbólico a uno numérico
-    numerical_equations_system = [eq.subs(control_variables) for eq in equations]
+# Entrada de valor para parámetros
+alpha_values = {
+    alpha_INT : st.sidebar.slider("Proporción de Tasa de Interés ($\u03B1_{INT}$)", min_value=0.0, max_value=1.0, value=0.1, step=0.01),
+    alpha_MOR : st.sidebar.slider("Proporción de Tasa de Mora ($\u03B1_{MOR}$)", min_value=0.0, max_value=1.0, value=0.1, step=0.01),
+    alpha_DES : st.sidebar.slider("Proporción de Tasa de Desgravamen ($\u03B1_{DES}$)", min_value=0.0, max_value=1.0, value=0.1, step=0.01),
+    alpha_ING_CUR : st.sidebar.slider("Proporción de Ingresos por Cursos ($\u03B1_{ING\_CUR}$)", min_value=0.0, max_value=1.0, value=0.1, step=0.01),
+    alpha_ING_SEG : st.sidebar.slider("Proporción de Ingresos por Seguros ($\u03B1_{ING\_SEG}$)", min_value=0.0, max_value=1.0, value=0.1, step=0.01),
+    alpha_COS_FON : st.sidebar.slider("Proporción del Costo de Fondeo ($\u03B1_{COS\_FON}$)", min_value=0.0, max_value=1.0, value=0.1, step=0.01),
+    alpha_DEP : st.sidebar.slider("Proporción de Depósitos ($\u03B1_{DEP}$)", min_value=0.0, max_value=1.0, value=0.1, step=0.01),
+    alpha_PRO : st.sidebar.slider("Proporción de Provisión ($\u03B1_{PRO}$)", min_value=0.0, max_value=1.0, value=0.1, step=0.01),
+    alpha_SAL_PER : st.sidebar.slider("Proporción de Salario del Personal ($\u03B1_{SAL\_PER}$)", min_value=0.0, max_value=1.0, value=0.1, step=0.01),
+    alpha_ALQ_MAN : st.sidebar.slider("Proporción de Alquiler y Mantenimiento ($\u03B1_{ALQ\_MAN}$)", min_value=0.0, max_value=1.0, value=0.1, step=0.01),
+    alpha_SER_BAS : st.sidebar.slider("Proporción de Servicios Básicos ($\u03B1_{SER\_BAS}$)", min_value=0.0, max_value=1.0, value=0.1, step=0.01),
+    alpha_CLC : st.sidebar.slider("Proporción de Costos Legales de Consultoría ($\u03B1_{CLC}$)", min_value=0.0, max_value=1.0, value=0.1, step=0.01),
+    alpha_PUB_MAR : st.sidebar.slider("Proporción de Publicidad y Marketing ($\u03B1_{PUB\_MAR}$)", min_value=0.0, max_value=1.0, value=0.1, step=0.01),
+    alpha_COM_VEN : st.sidebar.slider("Proporción de Comisiones de Ventas ($\u03B1_{COM\_VEN}$)", min_value=0.0, max_value=1.0, value=0.1, step=0.01),
+    alpha_EFC : st.sidebar.slider("Proporción de Eventos y Ferias Comerciales ($\u03B1_{EFC}$)", min_value=0.0, max_value=1.0, value=0.1, step=0.01),
+    alpha_GAS_OFI : st.sidebar.slider("Proporción de Gastos de Oficina ($\u03B1_{GAS\_OFI}$)", min_value=0.0, max_value=1.0, value=0.1, step=0.01),
+}
 
-    # Resolver el sistema de ecuaciones
-    output_variables = solve(numerical_equations_system, endogenous_vars, dict=True)[0]    
+# Asignación de valores a varibles exógenas y parámetros
+control_variables = {CAR: CAR_value, **alpha_values}
 
+# Conversión de un sistema de ecuaciones simbólico a uno numérico
+numerical_equations_system = [eq.subs(control_variables) for eq in equations]
+
+# Resolver el sistema de ecuaciones
+output_variables = solve(numerical_equations_system, endogenous_vars, dict=True)[0]    
+
+with main_tabs[1]:
     # Mostrar tabla de resultads
     if output_variables:
         data = {
@@ -188,7 +188,7 @@ with main_tabs[0]:
         st.success("Escenario guardado con éxito")
 
 
-with main_tabs[1]:
+with main_tabs[2]:
     # Mostrar los escenarios guardados
     st.subheader("Escenarios Guardados")
 
@@ -214,7 +214,7 @@ with main_tabs[1]:
         st.write("No hay escenarios guardados.")
         
 
-with main_tabs[2]:
+with main_tabs[0]:
     
     # Mostrar tabla de información financiera
     st.subheader("Análisis Financiero")
